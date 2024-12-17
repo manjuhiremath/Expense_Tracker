@@ -1,19 +1,16 @@
 const BASE_URL = "http://localhost:3000/api/";
 
-// Utility function to display messages
 function displayMessage(elementId, message, isError = false) {
   const messageElement = document.getElementById(elementId);
   messageElement.textContent = message;
   messageElement.className = isError ? "error" : "success";
 }
 
-// Utility function for email validation
 function validateEmail(email) {
   const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   return regex.test(email);
 }
 
-// Handle Sign-Up
 document.getElementById("signup-button").addEventListener("click", async (event) => {
   event.preventDefault(); // Prevent default form submission
 
@@ -32,9 +29,9 @@ document.getElementById("signup-button").addEventListener("click", async (event)
   }
 
   try {
-    const response = await axios.post(`${BASE_URL}/signup`, { name, email, password });
+    const response = await axios.post(`${BASE_URL}signup`, { name, email, password });
 
-    if (response.status === 200) {
+    if (response.status === 200 || response.status === 201) {
       displayMessage("signup-message", "Sign-Up successful!");
       // Clear form fields
       document.getElementById("signup-name").value = "";
@@ -67,14 +64,11 @@ document.getElementById("login-button").addEventListener("click", async (event) 
   }
 
   try {
-    const response = await axios.post(`${BASE_URL}/login`, { email, password });
+    const response = await axios.post(`http://localhost:3000/api/login`, { email, password });
 
     if (response.status === 200) {
       displayMessage("login-message", "Login successful!");
-      // Store JWT token (if any) and redirect
-      localStorage.setItem("authToken", response.data.token);
-      // Optionally redirect to another page
-      window.location.href = "/dashboard"; // Example redirect
+      window.location.href = "/frontend/Login";
     } else {
       displayMessage("login-message", response.data.error || "Login failed!", true);
     }

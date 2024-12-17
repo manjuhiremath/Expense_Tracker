@@ -3,24 +3,30 @@ import cors from 'cors';
 const app = express();
 import dotenv from "dotenv";
 import { sequelize } from './config/database.js';
-// Delete a user
-import loginRouter from './routes/userLogin.js';
-const PORT = process.env.PORT || 8090;
 
+//Routes
+import loginRouter from './routes/userLogin.js';
+
+
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5500", 
+    methods: ["GET", "POST", "PUT", "DELETE"], 
+    credentials: true, 
+  })
+);
 dotenv.config();
-app.use(cors());
-app.options("*", cors());
 
 app.use(json());
 app.use("/api", loginRouter);
 app.get("/", (req, res) => {
-    res.json("Welcome to LMS tool, Let's start learning!!!!");
+    res.json("Welcome to Expense Tracker!!!!");
   });
   
   const start = async () => {
     try {
-      app.listen(PORT, () => {
-        console.log(PORT + " : connected");
+      app.listen(3000, () => {
+        console.log(3000 + " : connected");
       });
     } catch (error) {
       console.log(error);
