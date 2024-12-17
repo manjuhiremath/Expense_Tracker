@@ -5,16 +5,11 @@ import dotenv from "dotenv";
 import { sequelize } from './config/database.js';
 // Delete a user
 import loginRouter from './routes/userLogin.js';
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8090;
 
 dotenv.config();
-app.use(
-    cors({
-      origin: "http://localhost:5500", // Allow your React frontend
-      methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific HTTP methods
-      credentials: true, // Enable cookies if needed
-    })
-  );
+app.use(cors());
+app.options("*", cors());
 
 app.use(json());
 app.use("/api", loginRouter);
