@@ -1,9 +1,11 @@
 
 import express from "express";
-import { createExpense, getUserExpense } from "../controllers/expenseControllers";
+import { createExpense, deleteExpense, getUserExpense } from "../controllers/expenseControllers.js";
 
 
 const router = express.Router();
 
-router.post('/expense/:userId',createExpense);
-router.get('/expense/:userId',getUserExpense)
+router.post('/',createExpense);
+router.get('/:id',getUserExpense);
+router.delete('/:id',deleteExpense);
+export default router;

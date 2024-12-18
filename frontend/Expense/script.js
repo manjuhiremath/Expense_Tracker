@@ -1,31 +1,78 @@
-
-
 document.getElementById('addexpense').addEventListener('click', async (event) => {
     event.preventDefault();
-
-    // Get the values from the form fields
     const amount = document.getElementById("amount").value;
     const description = document.getElementById("description").value;
     const category = document.getElementById("category").value;
-    
-    console.log(amount);  // Debugging the amount value
-
-    // Get the userId from localStorage
-    const userId = window.localStorage.getItem('user');
-    console.log(userId);  // Debugging the userId value
+    const UserId = window.localStorage.getItem('user');
 
     try {
-        // Make the POST request to create an expense
-        const response = await axios.post(`http://localhost:3000/api/expense?userId=${userId}`, { amount, description, category });
+        const response = await axios.post(`http://localhost:3000/api/expense`, { amount, description, category,UserId });
 
         if (response.status === 201) {
-            // If the expense was created successfully, log the response
             console.log(response.data);
-            // You can also perform actions here, like redirecting or showing a success message
+            location.reload();
         } else {
-            console.log(response.data);  // In case of a different status code, log the response
+            console.log(response.data);  
         }
     } catch (error) {
-        console.error(error);  // In case of an error, log it
+        console.error(error);  
     }
 });
+
+document.addEventListener('DOMContentLoaded',async ()=>{
+    try{
+        const id = window.localStorage.getItem('user');
+        const response = await axios.get(`http://localhost:3000/api/expense/${id}`)
+        const contentElement = document.getElementById('content');
+        if (response.data.userExpense && response.data.userExpense.length > 0) {
+        //   response.data.userExpense.forEach(expense => {
+            const table = document.createElement('table');
+            table.classList.add('expense-table');
+            
+            // Create table header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Created At</th>
+                <th><button type='button' id='delete-btn' onclick='handleDelete()'></button></th>
+            `;
+            table.appendChild(headerRow);
+
+            // Iterate through each expense and create a row
+            response.data.userExpense.forEach(expense => {
+                const expenseRow = document.createElement('tr');
+                
+                // Create a table row for each expense
+                expenseRow.innerHTML = `
+                    <td>${expense.description}</td>
+                    <td>$${expense.amount}</td>
+                    <td>${expense.category}</td>
+                    <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
+                    <th><button type='button' id='delete-btn' onclick='handleDelete("${expense.id}")'>Delete</button></th>
+                `;
+                table.appendChild(expenseRow);
+            });
+
+            // Append the table to the content
+            contentElement.appendChild(table);
+        //   });
+        } else {
+            contentElement.innerHTML = '<p>No expenses found for this user.</p>';
+        }
+    }catch(err){
+        console.log(err);
+    }
+})
+
+async function handleDelete(id){
+    try{
+        const response = await axios.delete(`http://localhost:3000/api/expense/${id}`)
+        console.log(response);
+        location.reload();
+    }catch(err){
+        console.log(err)
+    }
+
+}

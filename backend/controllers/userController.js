@@ -1,5 +1,5 @@
 
-import { User } from "../models/User.js";
+import { Users } from "../models/User.js";
 import bcrypt from 'bcrypt';
 
 export const createUser = async (req, res) => {
@@ -9,7 +9,7 @@ export const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user with hashed password
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    const newUser = await Users.create({ name, email, password: hashedPassword });
 
     res.status(201).json({
       message: "User created successfully",
@@ -27,7 +27,7 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await Users.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

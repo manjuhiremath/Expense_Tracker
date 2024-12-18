@@ -6,7 +6,7 @@ import { sequelize } from './config/database.js';
 
 //Routes
 import loginRouter from './routes/userLogin.js';
-
+import expenseRouter from './routes/expense.js'
 
 app.use(
   cors({
@@ -18,6 +18,7 @@ app.use(
 dotenv.config();
 
 app.use(json());
+app.use("/api/expense",expenseRouter)
 app.use("/api", loginRouter);
 app.get("/", (req, res) => {
     res.json("Welcome to Expense Tracker!!!!");

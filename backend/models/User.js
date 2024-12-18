@@ -2,8 +2,8 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
 import { Expense } from "./expense.js";  // Import the Expense model to set up associations
 
-export const User = sequelize.define(
-  "User",
+export const Users = sequelize.define(
+  "Users",
   {
     id: {
       type: DataTypes.UUID,
@@ -24,15 +24,10 @@ export const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-  },
-  {
-    underscored: true,
-    tableName: "user",
   }
 );
 
-// Define the relationship: One User has many Expenses
-User.hasMany(Expense, { foreignKey: "userId", as: "expenses" });
-Expense.belongsTo(User, { foreignKey: "userId", as: "user" });
-// Sync the model (only once, avoid in production without migration strategy)
-sequelize.sync({ alter: true }).then(() => console.log("User table synced"));
+Users.hasMany(Expense, { onDelete: 'CASCADE' });  
+Expense.belongsTo(Users);
+
+
