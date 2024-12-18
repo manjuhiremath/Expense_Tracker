@@ -68,7 +68,9 @@ document.getElementById("login-button").addEventListener("click", async (event) 
 
     if (response.status === 200) {
       displayMessage("login-message", "Login successful!");
-      window.location.href = "/frontend/Login";
+      // console.log(response.data.UserId);
+      window.localStorage.setItem('user', response.data.UserId);
+      window.location.href = "/frontend/Expense";
     } else {
       displayMessage("login-message", response.data.error || "Login failed!", true);
     }

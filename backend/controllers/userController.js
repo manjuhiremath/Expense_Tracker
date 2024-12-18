@@ -38,7 +38,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    res.status(200).json({ message: "User login successful" });
+    res.status(200).json({ message: "User login successful" ,UserId:user.id});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error during login", error: error.message });

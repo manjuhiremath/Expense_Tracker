@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log-in</title>
+  </head>
+  <body>
+    <h4>Login Success Full</h4>
+    <h2>Welcome To Expense Tracker</h2>
+    <form action="">
+        <label for="">
+            Amount :
+            <input type="number" id="amount" placeholder="add amount">
+        </label>
+        <br>
+        <br>
+        <label for="">
+            Description :
+            <input type="text" id="description" placeholder="add description">
+        </label>
+        <br>
+        <br>
+        <label for="category">
+            Category:
+            <select id="category" name="category">
+                <option value="food">Food</option>
+                <option value="transport">Transport</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="education">Education</option>
+                <option value="utilities">Utilities</option>
+            </select>
+        </label>
+        <br>
+        <br>
+        <button type="submit" name="addexpense" id="addexpense">Save</button>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
