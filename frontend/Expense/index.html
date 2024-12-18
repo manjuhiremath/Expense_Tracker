@@ -9,37 +9,44 @@
     <h4>Login Success Full</h4>
     <h2>Welcome To Expense Tracker</h2>
     <div>
-    <form action="">
+      <form action="">
         <label for="">
-            Amount :
-            <input type="number" id="amount" placeholder="add amount">
+          Amount :
+          <input type="number" id="amount" placeholder="add amount" />
         </label>
-        <br>
-        <br>
+        <br />
+        <br />
         <label for="">
-            Description :
-            <input type="text" id="description" placeholder="add description">
+          Description :
+          <input type="text" id="description" placeholder="add description" />
         </label>
-        <br>
-        <br>
+        <br />
+        <br />
         <label for="category">
-            Category:
-            <select id="category" name="category">
-                <option value="food">Food</option>
-                <option value="transport">Transport</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="education">Education</option>
-                <option value="utilities">Utilities</option>
-            </select>
+          Category:
+          <select id="category" name="category">
+            <option value="food">Food</option>
+            <option value="transport">Transport</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="education">Education</option>
+            <option value="utilities">Utilities</option>
+          </select>
         </label>
-        <br>
-        <br>
-        <button type="submit" name="addexpense" id="addexpense">Add Expense</button>
-    </form>
-  </div>
-  <div class="content" id="content">
+        <br />
+        <br />
+        <button type="submit" name="addexpense" id="addexpense">
+          Add Expense
+        </button>
+      </form>
+    </div>
+    <div class="content" id="content"></div>
 
-  </div>
+    <div>
+      <button id="rzp-button1" class="btn btn-outline-dark btn-lg">
+        <i class="fas fa-money-bill"></i> Own Checkout
+      </button>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="script.js"></script>
   </body>

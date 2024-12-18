@@ -1,6 +1,11 @@
 
 import { Users } from "../models/User.js";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+function generateToken(id){
+  return jwt.sign({UserId : id},)
+}
 
 export const createUser = async (req, res) => {
   const { name, email, password } = req.body;
