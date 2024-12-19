@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 function generateToken(id){
-  return jwt.sign({UserId : id},)
+  return jwt.sign({UserId : id}, process.env.jwt)
 }
 
 export const createUser = async (req, res) => {
@@ -22,6 +22,7 @@ export const createUser = async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
+       
       },
     });
   } catch (error) {
@@ -43,7 +44,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    res.status(200).json({ message: "User login successful" ,UserId:user.id});
+    res.status(200).json({ message: "User login successful" ,UserId:user.id,isPremium:user.isPremium ,token: generateToken(user.id)});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error during login", error: error.message });

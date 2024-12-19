@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
 import { Expense } from "./expense.js";  // Import the Expense model to set up associations
+import { Orders } from "./orders.js";
 
 export const Users = sequelize.define(
   "Users",
@@ -18,16 +19,15 @@ export const Users = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      // unique: true,
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    isPremium:DataTypes.BOOLEAN,
   }
 );
 
-Users.hasMany(Expense, { onDelete: 'CASCADE' });  
-Expense.belongsTo(Users);
 
 

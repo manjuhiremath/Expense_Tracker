@@ -68,8 +68,10 @@ document.getElementById("login-button").addEventListener("click", async (event) 
 
     if (response.status === 200) {
       displayMessage("login-message", "Login successful!");
-      // console.log(response.data.UserId);
+      console.log(response.data.isPremium);
       window.localStorage.setItem('user', response.data.UserId);
+      window.localStorage.setItem('token',response.data.token);
+      window.localStorage.setItem('isPremium' ,response.data.isPremium);
       window.location.href = "/frontend/Expense";
     } else {
       displayMessage("login-message", response.data.error || "Login failed!", true);

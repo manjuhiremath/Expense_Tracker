@@ -9,7 +9,6 @@ export const Expense = sequelize.define('Expense', {
         primaryKey: true,
         allowNull: false,
     },
-   
     amount: {
         type: DataTypes.INTEGER,
         allowNull: false,
