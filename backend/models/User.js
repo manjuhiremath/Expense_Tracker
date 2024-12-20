@@ -8,7 +8,7 @@ export const Users = sequelize.define(
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4, 
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
     },
@@ -25,7 +25,15 @@ export const Users = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    isPremium:DataTypes.BOOLEAN,
+    isPremium: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    totalamount: {
+      type: DataTypes.INTEGER,
+
+    }
+
   }
 );
 

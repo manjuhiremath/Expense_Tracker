@@ -3,8 +3,8 @@ import { Users } from "../models/User.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-function generateToken(id){
-  return jwt.sign({UserId : id}, process.env.jwt)
+function generateToken(id) {
+  return jwt.sign({ UserId: id }, process.env.jwt)
 }
 
 export const createUser = async (req, res) => {
@@ -22,7 +22,7 @@ export const createUser = async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-       
+        isPremium:false,
       },
     });
   } catch (error) {
@@ -44,7 +44,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    res.status(200).json({ message: "User login successful" ,UserId:user.id,isPremium:user.isPremium ,token: generateToken(user.id)});
+    res.status(200).json({ message: "User login successful", UserId: user.id, isPremium: user.isPremium, token: generateToken(user.id) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error during login", error: error.message });
@@ -52,15 +52,22 @@ export const loginUser = async (req, res) => {
 };
 
 
-// export const getUsers = async (req, res) => {
-//   try {
-//     const users = await User.findAll();
-//     res.status(200).json(users);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Error fetching users", error: error.message });
-//   }
-// };
+export const getUsers = async (req, res) => {
+  try {
+    console.log(req.user.id)
+    const user = await Users.findOne({ where: { id: req.user.id } });
+    console.log(user)
+    if (user && user.isPremium) {
+      const users = await Users.findAll();
+      res.status(200).json(users);
+    }else{
+      res.status(200).json({});
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
 
 // export const getUserById = async (req, res) => {
 //   const { id } = req.params;

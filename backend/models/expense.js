@@ -21,10 +21,6 @@ export const Expense = sequelize.define('Expense', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // userId:{
-    //     type:DataTypes.STRING,
-    //     allowNull: false,
-    // }
 });
 
 

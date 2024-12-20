@@ -71,6 +71,8 @@ document.getElementById("login-button").addEventListener("click", async (event) 
       console.log(response.data.isPremium);
       window.localStorage.setItem('user', response.data.UserId);
       window.localStorage.setItem('token',response.data.token);
+      window.localStorage.setItem('email',email);
+
       window.localStorage.setItem('isPremium' ,response.data.isPremium);
       window.location.href = "/frontend/Expense";
     } else {

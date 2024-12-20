@@ -1,5 +1,5 @@
 import { Expense } from "../models/expense.js";
-
+import { Users } from '../models/User.js';
 
 export const createExpense = async (req, res) => {
     const UserId = req.user.id;
@@ -8,6 +8,7 @@ export const createExpense = async (req, res) => {
 
     try {
         const newExpense = await Expense.create({ amount, description, category, UserId });
+        await calculateTotalExpenses();
         res.status(201).json({
             message: "Expense created successfully",
             expense: {
@@ -25,7 +26,6 @@ export const createExpense = async (req, res) => {
 export const getUserExpense = async (req, res) => {
     try {
         const user  = req.user.id;
-        // console.log(user);
         const userExpense = await Expense.findAll({ where: { UserId:user } });
         if (userExpense.length === 0) {
             return res.status(404).json({ message: "No expenses found for this user." });
@@ -40,15 +40,12 @@ export const getUserExpense = async (req, res) => {
 export const deleteExpense = async (req, res) => {
     try {
         const {id} = req.params; 
-        // console.log(req)
         const expenseToDelete = await Expense.findByPk(id);
-        // console.log(id)
         if (!expenseToDelete) {
             return res.status(404).json({ message: "Expense not found." });
         }
-
         await expenseToDelete.destroy();
-
+        await calculateTotalExpenses();
       
         return res.status(200).json({ message: "Expense deleted successfully." });
     } catch (error) {
@@ -56,3 +53,23 @@ export const deleteExpense = async (req, res) => {
         return res.status(500).json({ message: "Error deleting expense", error: error.message });
     }
 };
+
+async function calculateTotalExpenses() {
+  try {
+    const users = await Users.findAll();
+
+    for (let user of users) {
+      const totalExpenses = await Expense.sum('amount', {
+        where: {
+          userId: user.id, 
+        },
+      });
+
+      await user.update({ totalamount: totalExpenses });
+    }
+
+    console.log('Total expenses updated for all users!');
+  } catch (error) {
+    console.error('Error calculating total expenses:', error);
+  }
+}
