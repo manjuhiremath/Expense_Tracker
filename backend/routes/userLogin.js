@@ -10,7 +10,7 @@ import {
   loginUser,
 } from "../controllers/userController.js";
 import { authenticateUser } from "../middleware/auth.js";
-import { mailing } from "../controllers/mailing.js";
+import { mailing, resetPasswordId, updatePassword } from "../controllers/mailing.js";
 
 const router = express.Router();
 
@@ -19,10 +19,7 @@ router.post("/signup", createUser);
 router.post("/login", loginUser);
 router.get('/users',authenticateUser,getUsers);
 router.post('/forgotpassword',mailing);
-// router.get("/users/:id", getUserById);
-
-// router.put("/users/:id", updateUser);
-
-// router.delete("/users/:id", deleteUser);
+router.get('/password/resetpassword/:id', resetPasswordId);
+router.post('/password/updatepassword', updatePassword);
 
 export default router;

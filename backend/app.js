@@ -11,6 +11,7 @@ import orderRoutes from './routes/order.js';
 import { Users } from './models/User.js';
 import { Expense } from './models/expense.js';
 import { Orders } from './models/orders.js';
+import { forgotPasswordRequests } from './models/forgotPasswordRequests.js';
 
 app.use(
   cors({
@@ -20,7 +21,7 @@ app.use(
   })
 );
 dotenv.config();
-
+app.use(express.urlencoded({ extended: true }));
 app.use(json());
 app.use("/api/premium", orderRoutes);
 app.use("/api/expense", expenseRouter);
@@ -43,6 +44,8 @@ Expense.belongsTo(Users);
 
 Users.hasMany(Orders);
 Orders.belongsTo(Users);
+Users.hasMany(forgotPasswordRequests);
+forgotPasswordRequests.belongsTo(Users);
 // Sync models
 sequelize
   .sync({ alter: true }) // use { force: true } only in development; it drops and recreates tables
