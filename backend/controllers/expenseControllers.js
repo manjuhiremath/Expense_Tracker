@@ -4,9 +4,9 @@ import awsSdk from 'aws-sdk';
 
 
 awsSdk.config.update({
-    region: 'us-east-1', // e.g., 'us-west-2'
-    accessKeyId: 'AKIATYDDLXDPGKAW5C3N',
-    secretAccessKey: 'E8OZMFu3R7KFJJle0TNyq5Mnpb1vwNXS753xLWxj',
+    region: process.env.REGION, // e.g., 'us-west-2'
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_KEY_ACCESS,
     
 });
 
@@ -34,10 +34,10 @@ export const downloadUserExpense = async (req, res) => {
         // if (!userExpenses) {
         //     return res.status(404).json({ message: "No expenses found for this user." });
         // }
-
+        const id = req.user.id
         console.log('User Expenses:', userExpenses);
         const stringifiedExpense = JSON.stringify(userExpenses);
-        const filename = 'expense.txt';
+        const filename = `expense${id}.txt`;
         const fileUrl = await UploadToS3(stringifiedExpense, filename);
 
         return res.status(200).json({ fileUrl, success: true });

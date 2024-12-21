@@ -1,7 +1,8 @@
 const isPremium = window.localStorage.getItem("isPremium");
 const token = window.localStorage.getItem("token");
 const UserId = window.localStorage.getItem('user');
-
+let currentPage = 1;
+const itemsPerPage = 5;
 document.getElementById('addexpense').addEventListener('click', async (event) => {
     event.preventDefault();
     const amount = document.getElementById("amount").value;
@@ -30,21 +31,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log("UserId:", UserId);
 
     if (isPremium == 'true') {
-        document.getElementById('rzp-btn').style.display = "none";             
-        document.getElementById('premiums').style.display = 'block';         
-        document.getElementById('show-leader-div').style.display = 'block';  
-        document.getElementById('rzp-btn-div').style.display = 'none';       
-        document.getElementById('content-leadboard').style.display = 'none'; 
-    }  
+        document.getElementById('rzp-btn').style.display = "none";
+        document.getElementById('premiums').style.display = 'block';
+        document.getElementById('show-leader-div').style.display = 'block';
+        document.getElementById('rzp-btn-div').style.display = 'none';
+        document.getElementById('content-leadboard').style.display = 'none';
+    }
     if (isPremium == 'false') {
-        document.getElementById('rzp-btn').style.display = "block";          
-        document.getElementById('premiums').style.display = 'none';          
-        document.getElementById('show-leader-div').style.display = 'none';   
-        document.getElementById('rzp-btn-div').style.display = 'block';      
-        document.getElementById('content-leadboard').style.display = 'none'; 
+        document.getElementById('rzp-btn').style.display = "block";
+        document.getElementById('premiums').style.display = 'none';
+        document.getElementById('show-leader-div').style.display = 'none';
+        document.getElementById('rzp-btn-div').style.display = 'block';
+        document.getElementById('content-leadboard').style.display = 'none';
     }
     const contentElement = document.getElementById('content-expense');
-   
+
     try {
         const response = await axios.get('http://localhost:3000/api/expense', {
             headers: { "authorization": token }
@@ -54,48 +55,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         premiumUserData = responseUser.data;
         if (response.data.userExpense && response.data.userExpense.length > 0) {
-            const table = document.createElement('table');
-            table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');
-        
-            const headerRow = document.createElement('tr');
-            table.classList.add('border')
-            headerRow.innerHTML = `
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Category</th>
-                <th>Created At</th>
-                <th>Action</th>
-            `;
-            table.appendChild(headerRow);
-        
-            response.data.userExpense.forEach(expense => {
-                const expenseRow = document.createElement('tr');
-                expenseRow.innerHTML = `
-                    <td>${expense.description}</td>
-                    <td>$${expense.amount.toFixed(2)}</td> <!-- Format amount to 2 decimal places -->
-                    <td>${expense.category}</td>
-                    <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${expense.id}">
-                            Delete
-                        </button>
-                    </td>
-                `;
-                table.appendChild(expenseRow);
-            });
-        
-            contentElement.appendChild(table);
-        
-            contentElement.addEventListener('click', (event) => {
-                if (event.target.classList.contains('delete-btn')) {
-                    const expenseId = event.target.getAttribute('data-id');
-                    handleDelete(expenseId);
-                }
-            });
-        
+            renderTable(response.data.userExpense, currentPage);
         } else {
             contentElement.innerHTML = '<p>No expenses found for this user.</p>';
         }
+        //     const table = document.createElement('table');
+        //     table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');
+
+        //     const headerRow = document.createElement('tr');
+        //     table.classList.add('border')
+        //     headerRow.innerHTML = `
+        //         <th>Description</th>
+        //         <th>Amount</th>
+        //         <th>Category</th>
+        //         <th>Created At</th>
+        //         <th>Action</th>
+        //     `;
+        //     table.appendChild(headerRow);
+
+        //     response.data.userExpense.forEach(expense => {
+        //         const expenseRow = document.createElement('tr');
+        //         expenseRow.innerHTML = `
+        //             <td>${expense.description}</td>
+        //             <td>$${expense.amount.toFixed(2)}</td> <!-- Format amount to 2 decimal places -->
+        //             <td>${expense.category}</td>
+        //             <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
+        //             <td>
+        //                 <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${expense.id}">
+        //                     Delete
+        //                 </button>
+        //             </td>
+        //         `;
+        //         table.appendChild(expenseRow);
+        //     });
+
+        //     contentElement.appendChild(table);
+
+        //     contentElement.addEventListener('click', (event) => {
+        //         if (event.target.classList.contains('delete-btn')) {
+        //             const expenseId = event.target.getAttribute('data-id');
+        //             handleDelete(expenseId);
+        //         }
+        //     });
+
+        // } 
 
         document.getElementById('show-leader').addEventListener('click', () => {
             document.getElementById('show-leader').style.display = 'none';
@@ -104,25 +107,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('content-leadboard').style.display = 'block';
             if (premiumUserData && premiumUserData.length > 0) {
                 const leaderboardContainer = document.getElementById('content-leadboard');
-                
+
                 const leaderboardHeader = document.createElement('h4');
                 leaderboardHeader.textContent = 'Expenses Leaderboard';
                 leaderboardHeader.classList.add('text-center', 'my-4'); // Added display-4 for larger text
-        
+
                 leaderboardContainer.appendChild(leaderboardHeader);
-        
+
                 const table = document.createElement('table');
                 table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover', 'table-responsive'); // Added responsive class for better layout on small screens
-        
+
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = `
                     <th>Name</th>
                     <th>Amount</th>
                 `;
                 table.appendChild(headerRow);
-        
+
                 premiumUserData.sort((a, b) => b.totalamount - a.totalamount);
-        
+
                 premiumUserData.forEach(user => {
                     const expenseRow = document.createElement('tr');
                     expenseRow.innerHTML = `
@@ -131,9 +134,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
                     table.appendChild(expenseRow);
                 });
-        
+
                 leaderboardContainer.appendChild(table);
-        
+
             } else {
                 const message = document.createElement('p');
                 message.textContent = 'No data available for the leaderboard.';
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 leaderboardContainer.appendChild(message);
             }
         });
-       
+
     } catch (err) {
         console.log(err);
         contentElement.innerHTML = '<p>No expenses found for this user.</p>';
@@ -170,7 +173,7 @@ document.getElementById('rzp-btn').addEventListener('click', async () => {
                 orderid: options.order_id,
                 paymentid: response.razorpay_payment_id
             }, { headers: { 'authorization': token } })
-            window.location.setItem('isPremium','true');
+            window.location.setItem('isPremium', 'true');
             alert("Your Premium activated!");
         }
     }
@@ -179,20 +182,111 @@ document.getElementById('rzp-btn').addEventListener('click', async () => {
     raz.open();
 });
 
-document.getElementById('downloadexpense').addEventListener('click',async()=>{
+document.getElementById('downloadexpense').addEventListener('click', async () => {
 
-     await axios.get('http://localhost:3000/api/expense/download',{headers:{'authorization':token}})
-     .then((resp)=>{
-        // if(resp.status == 200){
+    await axios.get('http://localhost:3000/api/expense/download', { headers: { 'authorization': token } })
+        .then((resp) => {
+            // if(resp.status == 200){
             var a = document.createElement('a');
             a.href = resp.data.fileUrl;
             a.download = 'My_Expenses.txt';
             a.click();
-        // }
-     }).catch((err)=>{
-        console.log(err)
-     });
-
-   
-
+            // }
+        }).catch((err) => {
+            console.log(err)
+        });
 })
+
+
+
+
+function renderTable(expenses, page = 1) {
+    const contentElement = document.getElementById('content'); // Assuming this is your content element
+    contentElement.innerHTML = ''; // Clear previous content
+
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Created At</th>
+        <th>Action</th>
+    `;
+    table.appendChild(headerRow);
+
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedExpenses = expenses.slice(startIndex, endIndex);
+
+    paginatedExpenses.forEach(expense => {
+        const expenseRow = document.createElement('tr');
+        expenseRow.innerHTML = `
+            <td>${expense.description}</td>
+            <td>$${expense.amount.toFixed(2)}</td>
+            <td>${expense.category}</td>
+            <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${expense.id}">
+                    Delete
+                </button>
+            </td>
+        `;
+        table.appendChild(expenseRow);
+    });
+
+    contentElement.appendChild(table);
+
+    // Add pagination controls
+    renderPaginationControls(expenses.length);
+}
+
+function renderPaginationControls(totalItems) {
+    const contentElement = document.getElementById('content-expense');
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const paginationElement = document.createElement('div');
+    paginationElement.classList.add('pagination');
+
+    if (currentPage > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.classList.add('btn', 'btn-primary', 'mr-2');
+        prevButton.addEventListener('click', () => {
+            currentPage--;
+            renderTable(response.data.userExpense, currentPage);
+        });
+        paginationElement.appendChild(prevButton);
+    }
+
+    // Add info about current page and total pages
+    const pageInfo = document.createElement('span');
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    pageInfo.classList.add('mr-2');
+    paginationElement.appendChild(pageInfo);
+
+    if (currentPage < totalPages) {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.classList.add('btn', 'btn-primary');
+        nextButton.addEventListener('click', () => {
+            currentPage++;
+            renderTable(response.data.userExpense, currentPage);
+        });
+        paginationElement.appendChild(nextButton);
+    }
+
+    contentElement.appendChild(paginationElement);
+}
+
+// Add event listener for delete button
+document.getElementById('content').addEventListener('click', (event) => {
+    if (event.target.classList.contains('delete-btn')) {
+        const expenseId = event.target.getAttribute('data-id');
+        handleDelete(expenseId);
+    }
+});
+
+// Initial render
