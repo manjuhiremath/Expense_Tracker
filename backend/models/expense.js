@@ -23,5 +23,6 @@ export const Expense = sequelize.define('Expense', {
     },
 });
 
+sequelize.sync();
 
 

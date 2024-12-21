@@ -75,6 +75,6 @@ export const mailing =  async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     request.isActive = false;
     await user.save();
-    console.log(user.password)
+    // console.log(user.password)
     res.status(200).send('<html><body><h1>Password updated successfully</h1></body></html>');
   };

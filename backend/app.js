@@ -39,13 +39,13 @@ const start = async () => {
     console.log(error);
   }
 };
-Users.hasMany(Expense, { onDelete: 'CASCADE' });
-Expense.belongsTo(Users);
+Users.hasMany(Expense, { foreignKey: "UserId" });
+Expense.belongsTo(Users, { foreignKey: "UserId" });
 
-Users.hasMany(Orders);
-Orders.belongsTo(Users);
-Users.hasMany(forgotPasswordRequests);
-forgotPasswordRequests.belongsTo(Users);
+Users.hasMany(Orders, { foreignKey: "UserId" });
+Orders.belongsTo(Users, { foreignKey: "UserId" });
+Users.hasMany(forgotPasswordRequests, { foreignKey: "UserId" });
+forgotPasswordRequests.belongsTo(Users, { foreignKey: "UserId" });
 // Sync models
 sequelize
   .sync({ alter: true }) // use { force: true } only in development; it drops and recreates tables

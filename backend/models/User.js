@@ -38,4 +38,4 @@ export const Users = sequelize.define(
 );
 
 
-
+sequelize.sync();

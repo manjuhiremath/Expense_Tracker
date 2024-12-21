@@ -15,3 +15,5 @@ export const forgotPasswordRequests = sequelize.define('forgetpassword', {
        type: DataTypes.BOOLEAN, 
     }
 });
+
+sequelize.sync();

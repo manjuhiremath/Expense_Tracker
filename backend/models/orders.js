@@ -14,6 +14,7 @@ export const Orders = sequelize.define('order', {
     orderid:DataTypes.STRING,
     status:DataTypes.STRING
 });
+sequelize.sync();
 
 
 

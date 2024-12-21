@@ -1,5 +1,51 @@
 import { Expense } from "../models/expense.js";
 import { Users } from '../models/User.js';
+import awsSdk from 'aws-sdk';
+
+
+awsSdk.config.update({
+    region: 'us-east-1', // e.g., 'us-west-2'
+    accessKeyId: 'AKIATYDDLXDPGKAW5C3N',
+    secretAccessKey: 'E8OZMFu3R7KFJJle0TNyq5Mnpb1vwNXS753xLWxj',
+    
+});
+
+const s3 = new awsSdk.S3();
+
+async function UploadToS3(data, name) {
+    const params = {
+        Key: name, // The name you want to save the file as
+        Body: data, 
+        ACL: 'public-read',
+        Bucket: 'expensetracker1352',// The data to upload
+    };
+
+    try {
+        const uploadResult = await s3.upload(params).promise();
+        return uploadResult.Location; // Returns the URL of the uploaded file
+    } catch (error) {
+        console.error("Error uploading to S3:", error);
+        throw new Error("Upload failed");
+    }
+}
+export const downloadUserExpense = async (req, res) => {
+    try {
+        const userExpenses = await Users.findByPk(req.user.id);
+        // if (!userExpenses) {
+        //     return res.status(404).json({ message: "No expenses found for this user." });
+        // }
+
+        console.log('User Expenses:', userExpenses);
+        const stringifiedExpense = JSON.stringify(userExpenses);
+        const filename = 'expense.txt';
+        const fileUrl = await UploadToS3(stringifiedExpense, filename);
+
+        return res.status(200).json({ fileUrl, success: true });
+    } catch (error) {
+        console.error('Error downloading user expenses:', error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const createExpense = async (req, res) => {
     const UserId = req.user.id;
@@ -23,14 +69,18 @@ export const createExpense = async (req, res) => {
     }
 };
 
+
+
 export const getUserExpense = async (req, res) => {
     try {
         const user  = req.user.id;
+        // console.log(user)
         const userExpense = await Expense.findAll({ where: { UserId:user } });
         if (userExpense.length === 0) {
             return res.status(404).json({ message: "No expenses found for this user." });
         }
-        return res.status(200).json({ userExpense });
+        res.status(200).json({ userExpense });
+        return userExpense;
     } catch (err) {
         return res.status(500).json({ message: "Internal Server Error" });
     }

@@ -54,9 +54,9 @@ export const loginUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    console.log(req.user.id)
+    // console.log(req.user.id)
     const user = await Users.findOne({ where: { id: req.user.id } });
-    console.log(user)
+    // console.log(user)/
     if (user && user.isPremium) {
       const users = await Users.findAll();
       res.status(200).json(users);

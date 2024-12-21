@@ -52,31 +52,28 @@
     <div class="container">
       <h4 class="text-center">Login Success Full</h4>
       <h2>Welcome To Expense Tracker</h2>
-      <label id="premium" class="d-block mt-3 text-center" style="color: green; font-weight: bold;">
-        <i class="fa fa-bold fa-font-awesome" aria-hidden="true">
+      
+      <!-- Premium label -->
+      <div id="premiums">
+      <label id="premium" class="d-block mt-3 text-center" style="color: green; font-weight: bold; display: none;">
           Premium user!
-        </i>
       </label>
+      <!-- <div> -->
+        <button type="submit" id="downloadexpense" class="btn btn-success w-15 centre">
+          Download Expense File
+        </button>
+      <!-- </div> -->
+    </div>
       <!-- Expense Form -->
       <form id="expenseForm">
         <div class="row">
           <div class="col-12 col-md-6 mb-3">
             <label for="amount" class="form-label">Amount:</label>
-            <input
-              type="number"
-              class="form-control"
-              id="amount"
-              placeholder="Add amount"
-            />
+            <input type="number" class="form-control" id="amount" placeholder="Add amount" />
           </div>
           <div class="col-12 col-md-6 mb-3">
             <label for="description" class="form-label">Description:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="description"
-              placeholder="Add description"
-            />
+            <input type="text" class="form-control" id="description" placeholder="Add description" />
           </div>
           <div class="col-12 col-md-6 mb-3">
             <label for="category" class="form-label">Category:</label>
@@ -96,19 +93,24 @@
         </div>
       </form>
     </div>
+    
     <div id="content-expense" class="container mt-4"></div>
+    
+    <!-- Rzp Button Section -->
     <div id="rzp-btn-div" class="container mt-4">
       <button id="rzp-btn" class="btn btn-outline-dark btn-lg w-100">
         <i class="fas fa-money-bill"></i> Own Checkout
       </button>
     </div>
-
+    
+    <!-- Show Leaderboard Button Section -->
     <div id="show-leader-div" class="container mt-4 text-center">
-      <!-- Show Leaderboard Button -->
       <button id="show-leader" class="btn btn-primary w-100">
         Show Leaderboard
       </button>
     </div>
+    
+    <!-- Leaderboard Content Section -->
     <div id="content-leadboard" class="container"></div>
   
 
