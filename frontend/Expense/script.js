@@ -1,8 +1,7 @@
 const isPremium = window.localStorage.getItem("isPremium");
 const token = window.localStorage.getItem("token");
 const UserId = window.localStorage.getItem('user');
-let currentPage = 1;
-const itemsPerPage = 5;
+
 document.getElementById('addexpense').addEventListener('click', async (event) => {
     event.preventDefault();
     const amount = document.getElementById("amount").value;
@@ -24,12 +23,6 @@ document.getElementById('addexpense').addEventListener('click', async (event) =>
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-
-    console.log("isPremium:", isPremium);
-    console.log("token:", token);
-    console.log("UserId:", UserId);
-
     if (isPremium == 'true') {
         document.getElementById('rzp-btn').style.display = "none";
         document.getElementById('premiums').style.display = 'block';
@@ -44,66 +37,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('rzp-btn-div').style.display = 'block';
         document.getElementById('content-leadboard').style.display = 'none';
     }
-    const contentElement = document.getElementById('content-expense');
+    // const contentElement = document.getElementById('content-expense');
 
     try {
-        const response = await axios.get('http://localhost:3000/api/expense', {
-            headers: { "authorization": token }
-        });
+        // const response = await axios.get('http://localhost:3000/api/expense', {
+        //     headers: { "authorization": token }
+        // });
         const responseUser = await axios.get('http://localhost:3000/api/users', {
             headers: { "authorization": token }
         });
         premiumUserData = responseUser.data;
-        if (response.data.userExpense && response.data.userExpense.length > 0) {
-            renderTable(response.data.userExpense, currentPage);
-        } else {
-            contentElement.innerHTML = '<p>No expenses found for this user.</p>';
-        }
-        //     const table = document.createElement('table');
-        //     table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');
 
-        //     const headerRow = document.createElement('tr');
-        //     table.classList.add('border')
-        //     headerRow.innerHTML = `
-        //         <th>Description</th>
-        //         <th>Amount</th>
-        //         <th>Category</th>
-        //         <th>Created At</th>
-        //         <th>Action</th>
-        //     `;
-        //     table.appendChild(headerRow);
+        const pageSize = getPageSizePreference();
+        renderPageSizeSelector();
+        fetchExpenses(1, pageSize);
 
-        //     response.data.userExpense.forEach(expense => {
-        //         const expenseRow = document.createElement('tr');
-        //         expenseRow.innerHTML = `
-        //             <td>${expense.description}</td>
-        //             <td>$${expense.amount.toFixed(2)}</td> <!-- Format amount to 2 decimal places -->
-        //             <td>${expense.category}</td>
-        //             <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
-        //             <td>
-        //                 <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${expense.id}">
-        //                     Delete
-        //                 </button>
-        //             </td>
-        //         `;
-        //         table.appendChild(expenseRow);
-        //     });
+        // if (response.data.userExpense && response.data.userExpense.length > 0) {
+        //     // renderTable(response.data.userExpense, currentPage);
+        // } else {
+        //     contentElement.innerHTML = '<p>No expenses found for this user.</p>';
+        // }
 
-        //     contentElement.appendChild(table);
-
-        //     contentElement.addEventListener('click', (event) => {
-        //         if (event.target.classList.contains('delete-btn')) {
-        //             const expenseId = event.target.getAttribute('data-id');
-        //             handleDelete(expenseId);
-        //         }
-        //     });
 
         // } 
 
         document.getElementById('show-leader').addEventListener('click', () => {
+
             document.getElementById('show-leader').style.display = 'none';
             document.getElementById('show-leader-div').style.display = 'none';
-
             document.getElementById('content-leadboard').style.display = 'block';
             if (premiumUserData && premiumUserData.length > 0) {
                 const leaderboardContainer = document.getElementById('content-leadboard');
@@ -200,36 +161,70 @@ document.getElementById('downloadexpense').addEventListener('click', async () =>
 
 
 
-function renderTable(expenses, page = 1) {
-    const contentElement = document.getElementById('content'); // Assuming this is your content element
+function savePageSizePreference(size) {
+    localStorage.setItem('expensePageSize', size);
+}
+
+// Retrieve page size preference from local storage
+function getPageSizePreference() {
+    return parseInt(localStorage.getItem('expensePageSize')) || 10; // Default to 10
+}
+
+// Fetch expenses from API
+async function fetchExpenses(page = 1, pageSize = 10) {
+    try {
+        const response = await axios.get(
+            `http://localhost:3000/api/expense/?page=${page}&pageSize=${pageSize}`,
+            {
+                headers: { Authorization: token },
+            }
+        );
+
+        if (response.data) {
+            const { userExpense, currentPage, totalPages } = response.data;
+            renderTable(userExpense, pageSize, currentPage);
+            renderPaginationControls(currentPage, totalPages, pageSize);
+        } else {
+            console.error("Error fetching expenses:", response.statusText);
+        }
+    } catch (error) {
+        console.error("Error fetching expenses:", error);
+    }
+}
+
+function renderTable(expenses, pageSize, currentPage, totalPages) {
+    const contentElement = document.getElementById('content-expense');
     contentElement.innerHTML = ''; // Clear previous content
 
+    // Create table element
     const table = document.createElement('table');
-    table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.marginBottom = '20px';
 
+    // Create header row
     const headerRow = document.createElement('tr');
+    headerRow.style.backgroundColor = '#f8f9fa';
     headerRow.innerHTML = `
-        <th>Description</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Created At</th>
-        <th>Action</th>
+        <th style="padding: 5px; border: 1px solid #ddd; text-align: left; font-size: 12px;">Description</th>
+        <th style="padding: 5px; border: 1px solid #ddd; text-align: left; font-size: 12px;">Amount</th>
+        <th style="padding: 5px; border: 1px solid #ddd; text-align: left; font-size: 12px;">Category</th>
+        <th style="padding: 5px; border: 1px solid #ddd; text-align: left; font-size: 12px;">Action</th>
     `;
     table.appendChild(headerRow);
 
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedExpenses = expenses.slice(startIndex, endIndex);
-
-    paginatedExpenses.forEach(expense => {
+    // Add expense rows
+    expenses.forEach((expense) => {
         const expenseRow = document.createElement('tr');
+        expenseRow.style.border = '1px solid #ddd';
+
         expenseRow.innerHTML = `
-            <td>${expense.description}</td>
-            <td>$${expense.amount.toFixed(2)}</td>
-            <td>${expense.category}</td>
-            <td>${new Date(expense.createdAt).toLocaleDateString()}</td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${expense.id}">
+            <td class='border' style=" padding: 2px; text-align: left; font-size: 12px;">${expense.description}</td>
+            <td  class='border' style=" padding: 2px; text-align: left; font-size: 12px;">$${expense.amount}</td>
+            <td  class='border' style="padding: 2px; text-align: left; font-size: 12px;">${expense.category}</td>
+            <td  class='border' style="padding: 2px; text-align: left; font-size: 12px;">
+                <button type="button" style="font-size: 12px; padding: 5px 5px; background-color:rgb(177, 49, 62); color: white; border: none; cursor: pointer;"
+                        class="delete-btn" data-id="${expense.id}">
                     Delete
                 </button>
             </td>
@@ -239,54 +234,53 @@ function renderTable(expenses, page = 1) {
 
     contentElement.appendChild(table);
 
-    // Add pagination controls
-    renderPaginationControls(expenses.length);
+    contentElement.addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-btn')) {
+            const expenseId = event.target.getAttribute('data-id');
+            handleDelete(expenseId);
+        }
+    });
 }
 
-function renderPaginationControls(totalItems) {
-    const contentElement = document.getElementById('content-expense');
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+// Render pagination controls
+function renderPaginationControls(currentPage, totalPages, pageSize) {
+    const paginationControlsElement = document.getElementById('pagination-controls');
+    let paginationHTML = '';
 
-    const paginationElement = document.createElement('div');
-    paginationElement.classList.add('pagination');
 
-    if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.classList.add('btn', 'btn-primary', 'mr-2');
-        prevButton.addEventListener('click', () => {
-            currentPage--;
-            renderTable(response.data.userExpense, currentPage);
-        });
-        paginationElement.appendChild(prevButton);
+    for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `
+            <button class="btn btn-primary"  style="margin: 5px; font-size: 12px; padding: 3px 8px;" 
+                    onclick="fetchExpenses(${i}, ${pageSize})"
+                    ${i === currentPage ? 'disabled' : ''}>
+                ${i}
+            </button>
+        `;
     }
 
-    // Add info about current page and total pages
-    const pageInfo = document.createElement('span');
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-    pageInfo.classList.add('mr-2');
-    paginationElement.appendChild(pageInfo);
-
-    if (currentPage < totalPages) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.classList.add('btn', 'btn-primary');
-        nextButton.addEventListener('click', () => {
-            currentPage++;
-            renderTable(response.data.userExpense, currentPage);
-        });
-        paginationElement.appendChild(nextButton);
-    }
-
-    contentElement.appendChild(paginationElement);
+    paginationControlsElement.innerHTML = paginationHTML;
 }
 
-// Add event listener for delete button
-document.getElementById('content').addEventListener('click', (event) => {
-    if (event.target.classList.contains('delete-btn')) {
-        const expenseId = event.target.getAttribute('data-id');
-        handleDelete(expenseId);
-    }
-});
+// Render page size selector
+function renderPageSizeSelector() {
+    const pageSizeSelector = document.getElementById('page-size-selector');
+    const savedSize = getPageSizePreference();
 
-// Initial render
+    pageSizeSelector.value = savedSize;
+
+    pageSizeSelector.addEventListener('change', (event) => {
+        const newSize = parseInt(event.target.value, 10);
+        savePageSizePreference(newSize);
+        fetchExpenses(1, newSize); // Reset to page 1 with the new page size
+    });
+}
+
+// Function to get the page size preference from localStorage
+function getPageSizePreference() {
+    return localStorage.getItem('pageSize') || 10; // Default to 10 if no preference is saved
+}
+
+// Function to save the page size preference to localStorage
+function savePageSizePreference(size) {
+    localStorage.setItem('pageSize', size);
+}

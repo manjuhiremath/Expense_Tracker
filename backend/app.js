@@ -3,7 +3,9 @@ import cors from 'cors';
 const app = express();
 import dotenv from "dotenv";
 import { sequelize } from './config/database.js';
-
+import helmet from 'helmet';
+import compression from 'compression';
+import fs from "fs";
 //Routes
 import loginRouter from './routes/userLogin.js';
 import expenseRouter from './routes/expense.js'
@@ -12,6 +14,7 @@ import { Users } from './models/User.js';
 import { Expense } from './models/expense.js';
 import { Orders } from './models/orders.js';
 import { forgotPasswordRequests } from './models/forgotPasswordRequests.js';
+import morgan from 'morgan';
 
 app.use(
   cors({
@@ -21,6 +24,11 @@ app.use(
   })
 );
 dotenv.config();
+const logsData = fs.createWriteStream(path.join(__dirname,"access.log"),{flags:'a'});
+
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined',{stream:logsData}))
 app.use(express.urlencoded({ extended: true }));
 app.use(json());
 app.use("/api/premium", orderRoutes);

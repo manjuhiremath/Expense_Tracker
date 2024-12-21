@@ -7,7 +7,7 @@ awsSdk.config.update({
     region: process.env.REGION, // e.g., 'us-west-2'
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_KEY_ACCESS,
-    
+
 });
 
 const s3 = new awsSdk.S3();
@@ -15,7 +15,7 @@ const s3 = new awsSdk.S3();
 async function UploadToS3(data, name) {
     const params = {
         Key: name, // The name you want to save the file as
-        Body: data, 
+        Body: data,
         ACL: 'public-read',
         Bucket: 'expensetracker1352',// The data to upload
     };
@@ -35,7 +35,7 @@ export const downloadUserExpense = async (req, res) => {
         //     return res.status(404).json({ message: "No expenses found for this user." });
         // }
         const id = req.user.id
-        console.log('User Expenses:', userExpenses);
+        // console.log('User Expenses:', userExpenses);
         const stringifiedExpense = JSON.stringify(userExpenses);
         const filename = `expense${id}.txt`;
         const fileUrl = await UploadToS3(stringifiedExpense, filename);
@@ -50,7 +50,7 @@ export const downloadUserExpense = async (req, res) => {
 export const createExpense = async (req, res) => {
     const UserId = req.user.id;
     // console.log(UserId.id)
-    const { amount, description, category} = req.body;
+    const { amount, description, category } = req.body;
 
     try {
         const newExpense = await Expense.create({ amount, description, category, UserId });
@@ -73,9 +73,9 @@ export const createExpense = async (req, res) => {
 
 export const getUserExpense = async (req, res) => {
     try {
-        const user  = req.user.id;
+        const user = req.user.id;
         // console.log(user)
-        const userExpense = await Expense.findAll({ where: { UserId:user } });
+        const userExpense = await Expense.findAll({ where: { UserId: user } });
         if (userExpense.length === 0) {
             return res.status(404).json({ message: "No expenses found for this user." });
         }
@@ -84,19 +84,50 @@ export const getUserExpense = async (req, res) => {
     } catch (err) {
         return res.status(500).json({ message: "Internal Server Error" });
     }
-
 }
+
+export const getUserExpensePagination = async (req, res) => {
+    try {
+        const user = req.user.id;
+        const { page = 1, pageSize = 5 } = req.query; // Default to page 1 and 10 items per page
+
+        // Convert query params to integers
+        const limit = parseInt(pageSize);
+        const offset = (parseInt(page) - 1) * limit;
+        // console.log(user)
+        const { count, rows: userExpense } = await Expense.findAndCountAll({
+            where: { UserId: user },
+            limit,
+            offset,
+        });
+        // const userExpense = expense.rows;
+        console.log(userExpense.length);
+        // console.log();
+        if (userExpense.length === 0) {
+            return res.status(404).json({ message: "No expenses found for this user." });
+        }
+        const totalpages = Math.ceil(count / limit);
+        res.status(200).json({
+            userExpense,
+            totalExpenses: count,
+            totalPages: totalpages,
+            currentPage: parseInt(page),
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const deleteExpense = async (req, res) => {
     try {
-        const {id} = req.params; 
+        const { id } = req.params;
         const expenseToDelete = await Expense.findByPk(id);
         if (!expenseToDelete) {
             return res.status(404).json({ message: "Expense not found." });
         }
         await expenseToDelete.destroy();
         await calculateTotalExpenses();
-      
+
         return res.status(200).json({ message: "Expense deleted successfully." });
     } catch (error) {
         console.error(error);
@@ -105,21 +136,21 @@ export const deleteExpense = async (req, res) => {
 };
 
 async function calculateTotalExpenses() {
-  try {
-    const users = await Users.findAll();
+    try {
+        const users = await Users.findAll();
 
-    for (let user of users) {
-      const totalExpenses = await Expense.sum('amount', {
-        where: {
-          userId: user.id, 
-        },
-      });
+        for (let user of users) {
+            const totalExpenses = await Expense.sum('amount', {
+                where: {
+                    userId: user.id,
+                },
+            });
 
-      await user.update({ totalamount: totalExpenses });
+            await user.update({ totalamount: totalExpenses });
+        }
+
+        console.log('Total expenses updated for all users!');
+    } catch (error) {
+        console.error('Error calculating total expenses:', error);
     }
-
-    console.log('Total expenses updated for all users!');
-  } catch (error) {
-    console.error('Error calculating total expenses:', error);
-  }
 }
