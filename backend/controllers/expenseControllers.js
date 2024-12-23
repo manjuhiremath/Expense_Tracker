@@ -1,28 +1,30 @@
 import { Expense } from "../models/expense.js";
 import { Users } from '../models/User.js';
 import awsSdk from 'aws-sdk';
-
+import pdfMake from 'pdfmake/build/pdfmake.js';
+import pdfFonts from 'pdfmake/build/vfs_fonts.js';
 
 awsSdk.config.update({
-    region: process.env.REGION, // e.g., 'us-west-2'
+    region: process.env.REGION,
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_KEY_ACCESS,
 
 });
+pdfMake.vfs = pdfFonts.vfs;
 
 const s3 = new awsSdk.S3();
 
 async function UploadToS3(data, name) {
     const params = {
-        Key: name, // The name you want to save the file as
+        Key: name,
         Body: data,
         ACL: 'public-read',
-        Bucket: 'expensetracker1352',// The data to upload
+        Bucket: 'expensetracker1352',
     };
 
     try {
         const uploadResult = await s3.upload(params).promise();
-        return uploadResult.Location; // Returns the URL of the uploaded file
+        return uploadResult.Location;
     } catch (error) {
         console.error("Error uploading to S3:", error);
         throw new Error("Upload failed");
@@ -30,17 +32,70 @@ async function UploadToS3(data, name) {
 }
 export const downloadUserExpense = async (req, res) => {
     try {
-        const userExpenses = await Users.findByPk(req.user.id);
-        // if (!userExpenses) {
-        //     return res.status(404).json({ message: "No expenses found for this user." });
-        // }
-        const id = req.user.id
-        // console.log('User Expenses:', userExpenses);
-        const stringifiedExpense = JSON.stringify(userExpenses);
-        const filename = `expense${id}.txt`;
-        const fileUrl = await UploadToS3(stringifiedExpense, filename);
+        const userExpenses = await Expense.findAll({ where: { UserId: req.user.id } });
 
+        if (!userExpenses || userExpenses.length === 0) {
+            return res.status(404).json({ message: "No expenses found for this user." });
+        }
+        // console.log(userExpenses);
+        // Generate table body
+        // const tableBody = [
+        //     ['Description', 'Amount', 'Category', 'Date'], // Header row
+        //     ...userExpenses.map(expense => [
+        //         expense.description || 'N/A', // Replace undefined with 'N/A'
+        //         `$${expense.amount || 0}`, // Default amount to 0 if undefined
+        //         expense.category || 'N/A', // Replace undefined category
+        //         expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A', // Format or replace date
+        //     ]),
+        // ];
+
+        // Define PDF document structure
+        // const docDefinition = {
+        //     content: [
+        //         { text: 'User Expenses', style: 'header' },
+        //         {
+        //             table: {
+        //                 widths: ['*', '*', '*', '*'],
+        //                 body: tableBody,
+        //             },
+        //         },
+        //     ],
+        //     styles: {
+        //         header: {
+        //             fontSize: 18,
+        //             bold: true,
+        //             alignment: 'center',
+        //             margin: [0, 0, 0, 10],
+        //         },
+        //     },
+        // };
+        // console.log(docDefinition)
+        const date = new Date();
+        const stringifiedExpense = JSON.stringify(userExpenses);
+        const formattedDate = date.toISOString().split('T')[0];
+        const time = `${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
+        const filename = `expense_${req.user.id}_${formattedDate}_${time}.txt`;
+        const fileUrl = await UploadToS3(stringifiedExpense, filename);
         return res.status(200).json({ fileUrl, success: true });
+        // Generate PDF
+        // const pdfDoc = pdfMake.createPdf(docDefinition);
+        // pdfDoc.getBase64(async (data) => {
+        //     const date = new Date();
+        //     const formattedDate = date.toISOString().split('T')[0];
+        //     const time = `${date.getHours().toString().padStart(2, '0')}-${date.getMinutes().toString().padStart(2, '0')}-${date.getSeconds().toString().padStart(2, '0')}`;
+        //     const filename = `expense_${req.user.id}_${formattedDate}_${time}.pdf`;
+
+        //     try {
+        //         const fileUrl = await UploadToS3(data, filename); // Upload base64 data to S3
+        //         return res.status(200).json({
+        //             fileUrl,
+        //             success: true,
+        //         });
+        //     } catch (uploadError) {
+        //         console.error('Error uploading PDF:', uploadError);
+        //         return res.status(500).json({ message: "Failed to upload PDF" });
+        //     }
+        // });
     } catch (error) {
         console.error('Error downloading user expenses:', error);
         return res.status(500).json({ message: "Internal Server Error" });
@@ -49,7 +104,6 @@ export const downloadUserExpense = async (req, res) => {
 
 export const createExpense = async (req, res) => {
     const UserId = req.user.id;
-    // console.log(UserId.id)
     const { amount, description, category } = req.body;
 
     try {
