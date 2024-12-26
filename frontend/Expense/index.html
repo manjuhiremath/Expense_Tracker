@@ -51,15 +51,17 @@
 <body>
   <div class="container w-50 centre text-sm-center">
     <h4>Welcome To Expense Tracker</h4>
-    <label id="premium" class="d-block mt-3 text-center" style="color: green; font-weight: bold; display: none">
-      Premium user!
-    </label>
+    <div id="premiums">
+      <label id="premium" class="d-block mt-3 text-center" style="color: green; font-weight: bold; display: none">
+        Premium user!
+      </label>
+    </div>
   </div>
   <div class="container-xxl">
     <div class="row align-items-top justify-content-center">
       <div class="col-12 col-sm-6 col-md-4 col-lg-3">
         <div class="container">
-          <div id="premiums"></div>
+
 
           <form id="expenseForm">
             <div class="col centre justify-content-center">
@@ -119,7 +121,7 @@
         <!-- Rzp Button Section -->
         <div id="rzp-btn-div" class="container mt-4">
           <button id="rzp-btn" class="btn btn-outline-dark btn-lg w-100">
-            <i class="fas fa-money-bill"></i> Own Checkout
+            <i class="fas fa-money-bill"></i> Purchase Premium
           </button>
         </div>
 

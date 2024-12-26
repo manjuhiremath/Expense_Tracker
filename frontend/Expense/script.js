@@ -23,14 +23,15 @@ document.getElementById('addexpense').addEventListener('click', async (event) =>
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const isPremium = window.localStorage.getItem("isPremium");
     if (isPremium == 'true') {
         document.getElementById('rzp-btn').style.display = "none";
         document.getElementById('premiums').style.display = 'block';
         document.getElementById('show-leader-div').style.display = 'block';
         document.getElementById('rzp-btn-div').style.display = 'none';
         document.getElementById('content-leadboard').style.display = 'none';
-    }
-    if (isPremium == 'false') {
+    } 
+    if (isPremium == "false") {
         document.getElementById('rzp-btn').style.display = "block";
         document.getElementById('premiums').style.display = 'none';
         document.getElementById('show-leader-div').style.display = 'none';
@@ -165,12 +166,10 @@ function savePageSizePreference(size) {
     localStorage.setItem('expensePageSize', size);
 }
 
-// Retrieve page size preference from local storage
 function getPageSizePreference() {
     return parseInt(localStorage.getItem('expensePageSize')) || 10; // Default to 10
 }
 
-// Fetch expenses from API
 async function fetchExpenses(page = 1, pageSize = 10) {
     try {
         const response = await axios.get(
@@ -194,15 +193,13 @@ async function fetchExpenses(page = 1, pageSize = 10) {
 
 function renderTable(expenses, pageSize, currentPage, totalPages) {
     const contentElement = document.getElementById('content-expense');
-    contentElement.innerHTML = ''; // Clear previous content
+    contentElement.innerHTML = '';
 
-    // Create table element
     const table = document.createElement('table');
     table.style.width = '100%';
     table.style.borderCollapse = 'collapse';
     table.style.marginBottom = '20px';
 
-    // Create header row
     const headerRow = document.createElement('tr');
     headerRow.style.backgroundColor = '#f8f9fa';
     headerRow.innerHTML = `
@@ -213,7 +210,6 @@ function renderTable(expenses, pageSize, currentPage, totalPages) {
     `;
     table.appendChild(headerRow);
 
-    // Add expense rows
     expenses.forEach((expense) => {
         const expenseRow = document.createElement('tr');
         expenseRow.style.border = '1px solid #ddd';
@@ -242,7 +238,6 @@ function renderTable(expenses, pageSize, currentPage, totalPages) {
     });
 }
 
-// Render pagination controls
 function renderPaginationControls(currentPage, totalPages, pageSize) {
     const paginationControlsElement = document.getElementById('pagination-controls');
     let paginationHTML = '';
@@ -261,7 +256,6 @@ function renderPaginationControls(currentPage, totalPages, pageSize) {
     paginationControlsElement.innerHTML = paginationHTML;
 }
 
-// Render page size selector
 function renderPageSizeSelector() {
     const pageSizeSelector = document.getElementById('page-size-selector');
     const savedSize = getPageSizePreference();
@@ -271,16 +265,14 @@ function renderPageSizeSelector() {
     pageSizeSelector.addEventListener('change', (event) => {
         const newSize = parseInt(event.target.value, 10);
         savePageSizePreference(newSize);
-        fetchExpenses(1, newSize); // Reset to page 1 with the new page size
+        fetchExpenses(1, newSize);
     });
 }
 
-// Function to get the page size preference from localStorage
 function getPageSizePreference() {
-    return localStorage.getItem('pageSize') || 10; // Default to 10 if no preference is saved
+    return localStorage.getItem('pageSize') || 10;
 }
 
-// Function to save the page size preference to localStorage
 function savePageSizePreference(size) {
     localStorage.setItem('pageSize', size);
 }
