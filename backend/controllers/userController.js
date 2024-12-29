@@ -4,16 +4,23 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 function generateToken(id) {
-  return jwt.sign({ UserId: id }, process.env.jwt)
+  return jwt.sign({ UserId: id }, process.env.JWT)
 }
 
 export const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
+    const emailExists = await Users.findOne({ where: { email } });
+    if (emailExists) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    const nameExists = await Users.findOne({ where: { name } });
+    if (nameExists) {
+      return res.status(400).json({ message: "Name already exists" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user with hashed password
     const newUser = await Users.create({ name, email, password: hashedPassword });
 
     res.status(201).json({
@@ -35,13 +42,12 @@ export const loginUser = async (req, res) => {
   try {
     const user = await Users.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User with this email does not exist" });
     }
 
-    // Compare the hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     res.status(200).json({ message: "User login successful", UserId: user.id, isPremium: user.isPremium, token: generateToken(user.id) });
@@ -54,9 +60,7 @@ export const loginUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    // console.log(req.user.id)
     const user = await Users.findOne({ where: { id: req.user.id } });
-    // console.log(user)/
     if (user && user.isPremium) {
       const users = await Users.findAll();
       res.status(200).json(users);

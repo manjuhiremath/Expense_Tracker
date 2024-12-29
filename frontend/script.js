@@ -33,7 +33,6 @@ document.getElementById("signup-button").addEventListener("click", async (event)
 
     if (response.status === 200 || response.status === 201) {
       displayMessage("signup-message", "Sign-Up successful!");
-      // Clear form fields
       document.getElementById("signup-name").value = "";
       document.getElementById("signup-email").value = "";
       document.getElementById("signup-password").value = "";
@@ -41,12 +40,14 @@ document.getElementById("signup-button").addEventListener("click", async (event)
       displayMessage("signup-message", response.data.error || "Sign-Up failed!", true);
     }
   } catch (error) {
-    console.error(error);
-    displayMessage("signup-message", "Something went wrong!", true);
+    if (error.response && error.response.status === 400) {
+      displayMessage("signup-message", error.response.data.error || "Invalid credentials", true);
+    } else {
+      displayMessage("signup-message", "Something went wrong!", true);
+    }
   }
 });
 
-// Handle Login
 document.getElementById("login-button").addEventListener("click", async (event) => {
   event.preventDefault(); // Prevent default form submission
 
@@ -79,23 +80,35 @@ document.getElementById("login-button").addEventListener("click", async (event) 
       displayMessage("login-message", response.data.error || "Login failed!", true);
     }
   } catch (error) {
-    console.error(error);
-    displayMessage("login-message", "Something went wrong!", true);
+    if (error.response) {
+      switch (error.response.status) {
+        case 400:
+          displayMessage("login-message", "Email and password are required", true);
+          break;
+        case 404:
+          displayMessage("login-message", "User with this email does not exist", true);
+          break;
+        case 401:
+          displayMessage("login-message", "Incorrect password", true);
+          break;
+        default:
+          displayMessage("login-message", "Login failed! Please try again later.", true);
+      }
+    } else {
+      displayMessage("login-message", "An unexpected error occurred!", true);
+    }
   }
 });
 
-// Show Sign-Up form
 document.getElementById("show-signup").addEventListener("click", () => {
   document.getElementById("signup-form").style.display = "block";
   document.getElementById("login-form").style.display = "none";
 });
 
-// Show Login form
 document.getElementById("show-login").addEventListener("click", () => {
   document.getElementById("signup-form").style.display = "none";
   document.getElementById("login-form").style.display = "block";
 });
 
-// Initially show the Login form (you can change this based on your preference)
 document.getElementById("login-form").style.display = "block";
 document.getElementById("signup-form").style.display = "none";
